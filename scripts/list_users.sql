@@ -1,2 +1,2 @@
 use mysql;
-SELECT user FROM user;
+SELECT Host, User FROM user;
