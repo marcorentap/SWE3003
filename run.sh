@@ -1,1 +1,1 @@
-sudo mycli -t --no-warn
+mycli -t --no-warn
