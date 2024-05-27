@@ -173,26 +173,74 @@ Node *_splitChild(Node *present) {
   risingKey = present->keys[splitIdx];
 
   // Partition present into left and right
-  // if (present->parent != NULL) {
+
   // Copy rightmost children and key into right
   right->parent = present->parent;
-  right->n = present->n - splitIdx - 1;
-  for (int i = 0; i < right->n; i++) {
-    Node *child = present->child[splitIdx + i + 1];
-    int key = present->keys[splitIdx + i + 1];
-    right->child[i] = child;
-    right->keys[i] = key;
+  if (!present->leaf) {
+    // If present not leaf, move key to parent
+    // i.e. don't include splitting key
+    right->n = present->n - splitIdx - 1;
+    for (int i = 0; i < right->n; i++) {
+      Node *child = present->child[splitIdx + i + 1];
+      int key = present->keys[splitIdx + i + 1];
+      right->child[i] = child;
+      right->keys[i] = key;
+    }
+  } else {
+    // If present is leaf, copy key to parent
+    // i.e. keep splitting key
+    right->n = present->n - splitIdx;
+    for (int i = 0; i < right->n; i++) {
+      Node *child = present->child[splitIdx + i];
+      int key = present->keys[splitIdx + i];
+      right->child[i] = child;
+      right->keys[i] = key;
+    }
   }
 
   // Present becomes left. Remove rightmost keys and children
   left = present;
-  left->n = left->n - splitIdx - 1;
+  left->n = splitIdx;
   for (int i = 0; i < right->n; i++) {
     // Just invalidate rightmost items
     left->child[splitIdx + i] = NULL;
     left->keys[splitIdx + i] = -1;
   }
-  // }
+
+  if (present->parent != NULL) {
+    Node *parent = present->parent;
+    int insertIdx;
+
+    // // Put rising key in parent key list
+    // for (insertIdx = parent->n - 1; insertIdx >= 0; insertIdx--) {
+    //   int key = parent->keys[insertIdx];
+    //   if (key < risingKey) {
+    //     parent->keys[insertIdx] = risingKey;
+    //     break;
+    //   }
+    // }
+
+    // Insert rising key to parent, sorted
+    for (insertIdx = parent->n; i >= 0; i--) {
+      int prevKey = parent->keys[insertIdx - 1];
+      if (prevKey > risingKey) {
+        // Move larger keys to the right
+        parent->keys[insertIdx] = parent->keys[insertIdx - 1];
+      } else {
+        break;
+      }
+    }
+    parent->keys[insertIdx] = risingKey;
+
+    // Put right in parent in parent child list
+    parent->n++;
+    parent->child[parent->n] = right;
+  }
+
+  // Update next pointers
+  right->next = present->next;
+  left->next = right;
+
   //-------------------------------------------------------------------------------------------------------
 
   if (present->parent != NULL)
