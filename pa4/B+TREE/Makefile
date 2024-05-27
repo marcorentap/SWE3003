@@ -1,5 +1,5 @@
 all:
-	gcc -o main main.c B+TREE.c -lm
+	gcc -g -o main main.c B+TREE.c -lm
 
 clean:
 	rm main

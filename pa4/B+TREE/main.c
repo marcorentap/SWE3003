@@ -72,6 +72,7 @@ int main(int argc, char* argv[]) {
                 printf("Invalid instruction: %c\n", instruction);
                 exit(1);
         }
+        printTree();
     }
 
     fclose(fp);
