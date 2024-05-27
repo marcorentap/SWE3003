@@ -249,13 +249,13 @@ Node *_splitChild(Node *present) {
   left->next = right;
 
   // Update parent list
-  for (int i = 0; i < right->n+1; i++) {
+  for (int i = 0; i < right->n + 1; i++) {
     Node *child = right->child[i];
     if (child != NULL) {
       child->parent = right;
     }
   }
-  for (int i = 0; i < left->n+1; i++) {
+  for (int i = 0; i < left->n + 1; i++) {
     Node *child = left->child[i];
     if (child != NULL) {
       child->parent = left;
@@ -307,12 +307,39 @@ void removeElement(int k) {
 }
 
 void _remove(Node *present, int k) {
-  if (search(k) == NULL) {
+  Node *r;
+  if ((r = search(k)) == NULL) {
     printf("error");
     return;
   } else {
     //-------------------------------------------------------------------------------------------------------
     // Write your code.
+    int i;
+    if (r->leaf) {
+      // Shift rightward keys to remove k
+      for (i = 0; i < r->n; i++) {
+        if (r->keys[i] == k)
+          break;
+      }
+      for (; i < r->n; i++) {
+        r->keys[i] = r->keys[i + 1];
+      }
+      r->n--;
+
+      // Shift rightward keys to remove this child
+      for (i = 0; i < r->parent->n + 1; i++) {
+        Node *child = r->parent->child[i];
+        if (child == r) {
+          break;
+        }
+      }
+      for (; i < r->parent->n + 1; i++) {
+        r->parent->child[i] = r->parent->child[i + 1];
+      }
+    } else {
+      _remove(r, k);
+    }
+    _balancingAfterDel(r);
 
     //-------------------------------------------------------------------------------------------------------
   }
