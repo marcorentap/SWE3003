@@ -181,10 +181,13 @@ Node *_splitChild(Node *present) {
     // i.e. don't include splitting key
     right->n = present->n - splitIdx - 1;
     for (int i = 0; i < right->n; i++) {
-      Node *child = present->child[splitIdx + i + 1];
       int key = present->keys[splitIdx + i + 1];
-      right->child[i] = child;
       right->keys[i] = key;
+    }
+    // move child
+    for (int i = 0; i < right->n + 1; i++) {
+      Node *child = present->child[splitIdx + i + 1];
+      right->child[i] = child;
     }
   } else {
     // If present is leaf, copy key to parent
@@ -201,10 +204,13 @@ Node *_splitChild(Node *present) {
   // Present becomes left. Remove rightmost keys and children
   left = present;
   left->n = splitIdx;
+  // Invalidate rightmost keys
   for (int i = 0; i < right->n; i++) {
-    // Just invalidate rightmost items
-    left->child[splitIdx + i] = NULL;
     left->keys[splitIdx + i] = -1;
+  }
+  // Invalidate rightmost child
+  for (int i = 0; i < right->n; i++) {
+    left->child[splitIdx + i + 1] = NULL;
   }
 
   if (present->parent != NULL) {
@@ -232,14 +238,29 @@ Node *_splitChild(Node *present) {
     }
     parent->keys[insertIdx] = risingKey;
 
-    // Put right in parent in parent child list
+    // Put right in parent child list
     parent->n++;
     parent->child[parent->n] = right;
+    present->parent->leaf = 0;
   }
 
   // Update next pointers
   right->next = present->next;
   left->next = right;
+
+  // Update parent list
+  for (int i = 0; i < right->n+1; i++) {
+    Node *child = right->child[i];
+    if (child != NULL) {
+      child->parent = right;
+    }
+  }
+  for (int i = 0; i < left->n+1; i++) {
+    Node *child = left->child[i];
+    if (child != NULL) {
+      child->parent = left;
+    }
+  }
 
   //-------------------------------------------------------------------------------------------------------
 
